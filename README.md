@@ -1,3 +1,6 @@
+# Release Notes
+- v 1.0.9 - Fix issue with Invalid theme https://github.com/kiwicommerce/magento2-cron-scheduler/issues/25
+
 # Fork
 - Oct. 2020 - [KiwiCommerce](https://kiwicommerce.co.uk/) stop maintaining this extension. We will try to continue his development.
 
