@@ -1,63 +1,58 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Block\Adminhtml\Dashboard;
+declare(strict_types=1);
 
-/**
- * Class Cronjobs
- * @package KiwiCommerce\CronScheduler\Block\Adminhtml\Dashboard
- */
-class Cronjobs extends \Magento\Backend\Block\Template
+namespace Webcode\CronScheduler\Block\Adminhtml\Dashboard;
+
+use Magento\Backend\Block\Template;
+use Magento\Backend\Block\Template\Context;
+use Magento\Cron\Model\Schedule;
+use Magento\Store\Model\ScopeInterface;
+use Webcode\CronScheduler\Model\ResourceModel\Schedule\Collection;
+use Webcode\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory;
+
+class Cronjobs extends Template
 {
-    /**
-     * @var \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory
-     */
-    public $scheduleCollectionFactory = null;
-
     /**
      * Dashboard enable/disable status
      */
-    const XML_PATH_DASHBOARD_ENABLE_STATUS = 'cronscheduler/general/cronscheduler_dashboard_enabled';
+    public const XML_PATH_DASHBOARD_ENABLE_STATUS = 'cronscheduler/general/cronscheduler_dashboard_enabled';
 
     /**
      * Display total records on dashboard
      */
-    const TOTAL_RECORDS_ON_DASHBOARD = 5;
+    public const TOTAL_RECORDS_ON_DASHBOARD = 5;
 
     /**
      * Class constructor.
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $scheduleCollectionFactory
+     *
+     * @param Context $context
+     * @param CollectionFactory $scheduleCollectionFactory
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $scheduleCollectionFactory
+        Context $context,
+        private readonly CollectionFactory $scheduleCollectionFactory
     ) {
-        $this->scheduleCollectionFactory = $scheduleCollectionFactory;
         parent::__construct($context);
     }
 
     /**
      * Get Top running jobs
      *
-     * @return \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\Collection
+     * @return Collection
      */
-    public function getTopRunningJobs()
+    public function getTopRunningJobs(): Collection
     {
         $collection = $this->scheduleCollectionFactory->create();
 
-        $collection->addFieldToFilter('status', \Magento\Cron\Model\Schedule::STATUS_SUCCESS)
+        $collection->addFieldToFilter('status', Schedule::STATUS_SUCCESS)
             ->addExpressionFieldToSelect(
                 'timediff',
                 'TIME_TO_SEC(TIMEDIFF(`finished_at`, `executed_at`))',
@@ -72,12 +67,14 @@ class Cronjobs extends \Magento\Backend\Block\Template
 
     /**
      * Check store configuration value for dashboard
-     * @return mixed
+     *
+     * @return bool
      */
-    public function isDashboardActive()
+    public function isDashboardActive(): bool
     {
-        $dashboardEnableStatus = $this->_scopeConfig->getValue(self::XML_PATH_DASHBOARD_ENABLE_STATUS, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-
-        return $dashboardEnableStatus;
+        return $this->_scopeConfig->isSetFlag(
+            self::XML_PATH_DASHBOARD_ENABLE_STATUS,
+            ScopeInterface::SCOPE_STORE
+        );
     }
 }

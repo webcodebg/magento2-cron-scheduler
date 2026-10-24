@@ -1,0 +1,36 @@
+# IDE / editors
+.idea/
+.vscode/
+*.iml
+*.swp
+*~
+*.bak
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# AI / assistant tooling -- LOCAL state only. Shared config that the team commits
+# on purpose (CLAUDE.md, .claude/settings.json, .cursorrules) is NOT ignored;
+# add it here yourself only if you decide it should stay local.
+.claude/settings.local.json
+.claude/*.local.json
+.aider*
+.cursor/
+.windsurf/
+
+# PHP tooling caches
+.phpunit.result.cache
+.php-cs-fixer.cache
+.phpcs-cache
+/build/
+
+# Dependencies pulled locally (if any)
+/vendor/
+/node_modules/
+
+# Logs
+*.log
+
+# A module (library) usually does NOT commit its lock file -- uncomment if so:
+# composer.lock

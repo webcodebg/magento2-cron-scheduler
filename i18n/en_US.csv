@@ -14,8 +14,6 @@ Save,Save
 "Selected jobs can not be enabled.","Selected jobs can not be enabled."
 "You enabled selected jobs.","You enabled selected jobs."
 "Add New Cron Job","Add New Cron Job"
-"You saved the cron job.","You saved the cron job."
-"The cron job can not be saved.","The cron job can not be saved."
 "Cron Job Schedule List","Cron Job Schedule List"
 "A total of %1 record(s) have been deleted.","A total of %1 record(s) have been deleted."
 "Selected jobs can not be killed.","Selected jobs can not be killed."
@@ -50,16 +48,16 @@ PENDING,PENDING
 "Please enter valid class method.","Please enter valid class method."
 "Please enter a valid cron expression.","Please enter a valid cron expression."
 "Please enter a valid email address.","Please enter a valid email address."
-"KiwiCommerce Extensions","KiwiCommerce Extensions"
 General,General
-"Email Configuration","Email Configuration"
 "Schedule Now","Schedule Now"
 "Schedule jobs now","Schedule jobs now"
 "Are you sure to schedule selected jobs now?","Are you sure to schedule selected jobs now?"
 Enable,Enable
+"Enable Selected Jobs","Enable Selected Jobs"
 "Enable jobs","Enable jobs"
 "Are you sure to enable selected jobs?","Are you sure to enable selected jobs?"
 Disable,Disable
+"Disable Selected Jobs","Disable Selected Jobs"
 "Disable jobs","Disable jobs"
 "Are you sure to disable selected jobs?","Are you sure to disable selected jobs?"
 Group,Group
@@ -87,3 +85,7 @@ Message,Message
 "Ex : Magento\Catalog\Cron\RefreshSpecialPrices","Ex : Magento\Catalog\Cron\RefreshSpecialPrices"
 "Please enter method name to be executed. Ex: execute.","Please enter method name to be executed. Ex: execute."
 "Add multiple values using comma. Ex: * * * * *,* * * * 2.","Add multiple values using comma. Ex: * * * * *,* * * * 2."
+"Max Runtime (minutes)","Max Runtime (minutes)"
+"A running job older than this is killed. Empty: the default from Stores > Configuration > Cron Scheduler. 0: never killed.","A running job older than this is killed. Empty: the default from Stores > Configuration > Cron Scheduler. 0: never killed."
+"Kill Jobs Running Longer Than (minutes)","Kill Jobs Running Longer Than (minutes)"
+"Checked every 15 minutes. 0 means never. A job can override it in its own edit form (Max Runtime). Default 180.","Checked every 15 minutes. 0 means never. A job can override it in its own edit form (Max Runtime). Default 180."

@@ -1,22 +1,17 @@
 <?php
 
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
-namespace KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule;
+namespace Webcode\CronScheduler\Model\ResourceModel\Schedule;
 
 /**
  * Class Collection
- * @package KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule
+ * @package Webcode\CronScheduler\Model\ResourceModel\Schedule
  */
 class Collection extends \Magento\Cron\Model\ResourceModel\Schedule\Collection
 {
@@ -51,11 +46,11 @@ class Collection extends \Magento\Cron\Model\ResourceModel\Schedule\Collection
      * Get the last Cron Status
      * @return string | null
      */
-    public function getLastCronStatus()
+    public function getLastCronStatus(): ?string
     {
         $this->getSelect()->reset('columns')
             ->columns(['executed_at'])
-            ->where('executed_at is not null and job_code ="kiwicommerce_cronscheduler_status"')
+            ->where('executed_at is not null and job_code ="webcode_cronscheduler_status"')
             ->order('finished_at desc');
 
         $last = $this->getFirstItem();
@@ -70,7 +65,7 @@ class Collection extends \Magento\Cron\Model\ResourceModel\Schedule\Collection
      * Get Schedule task status
      * @return $this
      */
-    public function getScheduleTaskStatuses()
+    public function getScheduleTaskStatuses(): static
     {
         $this->getSelect()->reset('columns')
             ->columns('DISTINCT(status) as status')

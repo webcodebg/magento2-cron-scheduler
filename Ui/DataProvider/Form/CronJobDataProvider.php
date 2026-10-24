@@ -1,47 +1,29 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Ui\DataProvider\Form;
+declare(strict_types=1);
+
+namespace Webcode\CronScheduler\Ui\DataProvider\Form;
 
 use Magento\Cron\Model\ResourceModel\Schedule\CollectionFactory;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Ui\DataProvider\AbstractDataProvider;
 use Magento\Framework\App\RequestInterface;
+use Webcode\CronScheduler\Model\MaxRuntime;
+use Webcode\CronScheduler\Service\Cronjob;
 
-/**
- * Class CronJobDataProvider
- * @package KiwiCommerce\CronScheduler\Ui\DataProvider\Form
- */
 class CronJobDataProvider extends AbstractDataProvider
 {
     /**
-     * @var array
+     * @var array|null
      */
-    public $loadedData;
-
-    /**
-     * @var \KiwiCommerce\CronScheduler\Helper\Cronjob
-     */
-    public $jobHelper = null;
-
-    /**
-     * @var RequestInterface
-     */
-    public $request;
-    /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    public $scopeConfig;
+    private ?array $loadedData = null;
 
     /**
      * Class constructor.
@@ -49,8 +31,8 @@ class CronJobDataProvider extends AbstractDataProvider
      * @param string $primaryFieldName
      * @param string $requestFieldName
      * @param CollectionFactory $collectionFactory
-     * @param \KiwiCommerce\CronScheduler\Helper\Cronjob $jobHelper
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param Cronjob $jobHelper
+     * @param ScopeConfigInterface $scopeConfig
      * @param RequestInterface $request
      * @param array $meta
      * @param array $data
@@ -60,18 +42,14 @@ class CronJobDataProvider extends AbstractDataProvider
         $primaryFieldName,
         $requestFieldName,
         CollectionFactory $collectionFactory,
-        \KiwiCommerce\CronScheduler\Helper\Cronjob $jobHelper,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        RequestInterface $request,
-
+        private readonly Cronjob $jobHelper,
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly RequestInterface $request,
         array $meta = [],
         array $data = []
     ) {
         parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
         $this->collection = $collectionFactory->create();
-        $this->jobHelper = $jobHelper;
-        $this->request = $request;
-        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -93,6 +71,9 @@ class CronJobDataProvider extends AbstractDataProvider
                 }
 
                 $this->loadedData[$jobCode]['oldexpressionvalue'] = $this->loadedData[$jobCode]['schedule'];
+                $this->loadedData[$jobCode]['max_runtime'] = $this->scopeConfig->getValue(
+                    MaxRuntime::jobPath((string)$jobCode)
+                );
             }
         }
 

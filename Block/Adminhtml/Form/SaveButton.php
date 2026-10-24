@@ -1,31 +1,22 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Block\Adminhtml\Form;
+namespace Webcode\CronScheduler\Block\Adminhtml\Form;
 
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
 
-/**
- * Class SaveButton
- * @package KiwiCommerce\CronScheduler\Block\Adminhtml\Form
- */
 class SaveButton extends GenericButton implements ButtonProviderInterface
 {
     /**
      * @return array
      */
-    public function getButtonData()
+    public function getButtonData(): array
     {
         return [
             'label' => __('Save'),

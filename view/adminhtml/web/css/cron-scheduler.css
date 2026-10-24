@@ -1,0 +1,19 @@
+/*
+ * @package      Webcode_CronScheduler
+ *
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
+ */
+
+span.grid-severity-running {
+    background: #ACC4F7;
+    border: 1px solid #125BF6;
+    color: #125BF6;
+    display: block;
+    font-weight: bold;
+    line-height: 17px;
+    padding: 0 3px;
+    text-align: center;
+    text-transform: uppercase;
+}

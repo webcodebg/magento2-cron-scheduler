@@ -1,39 +1,29 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Ui\DataProvider\Group;
+declare(strict_types=1);
 
-class Options implements \Magento\Framework\Data\OptionSourceInterface
+namespace Webcode\CronScheduler\Ui\DataProvider\Group;
+
+use Magento\Cron\Model\ConfigInterface;
+use Magento\Framework\Data\OptionSourceInterface;
+
+class Options implements OptionSourceInterface
 {
     /**
-     * @var array
+     * @var array|null
      */
-    public $options = null;
+    private ?array $options = null;
 
-    /**
-     * @var \Magento\Cron\Model\ConfigInterface
-     */
-    public $cronConfig = null;
-
-    /**
-     * Class constructor
-     * @param \Magento\Cron\Model\ConfigInterface $cronConfig
-     */
     public function __construct(
-        \Magento\Cron\Model\ConfigInterface $cronConfig
+        private readonly ConfigInterface $cronConfig
     ) {
-        $this->cronConfig = $cronConfig;
     }
 
     /**

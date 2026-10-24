@@ -1,37 +1,9 @@
-/**
- * @file timeline.js
+/*
+ * @package      Webcode_CronScheduler
  *
- * @brief
- * The Timeline is an interactive visualization chart to visualize events in
- * time, having a start and end date.
- * You can freely move and zoom in the timeline by dragging
- * and scrolling in the Timeline. Items are optionally dragable. The time
- * scale on the axis is adjusted automatically, and supports scales ranging
- * from milliseconds to years.
- *
- * Timeline is part of the CHAP Links library.
- *
- * Timeline is tested on Firefox 3.6, Safari 5.0, Chrome 6.0, Opera 10.6, and
- * Internet Explorer 6+.
- *
- * @license
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy
- * of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- *
- * Copyright (c) 2011-2015 Almende B.V.
- *
- * @author  Jos de Jong, <jos@almende.org>
- * @date    2015-03-04
- * @version 2.9.1
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
 /*
@@ -216,7 +188,7 @@ links.Timeline = function (container, options) {
         'clusterMaxItems': 5,
         'style': 'box',
         'customStackOrder': false, //a function(a,b) for determining stackorder amongst a group of items. Essentially a comparator, -ve value for "a before b" and vice versa
-        
+
         // i18n: Timeline only has built-in English text per default. Include timeline-locales.js to support more localized text.
         'locale': 'en',
         'MONTHS': ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
@@ -230,7 +202,7 @@ links.Timeline = function (container, options) {
         'NEW': "New",
         'CREATE_NEW_EVENT': "Create new event"
     };
-    
+
     //
     // Now we can set the givenproperties
     //
@@ -2968,7 +2940,7 @@ links.Timeline.prototype.onMouseUp = function (event) {
             // Note that the change can be canceled from within an event listener if
             // this listener calls the method cancelChange().
             this.trigger(params.addItem ? 'add' : 'changed');
-            
+
             //retrieve item data again to include changes made to it in the triggered event handlers
             item = this.items[params.itemIndex];
 
@@ -4740,7 +4712,7 @@ links.Timeline.prototype.getCluster = function (index) {
     var clusterData = {},
         cluster = this.clusters[index],
         clusterItems = cluster.items;
-    
+
     clusterData.start = new Date(cluster.start.valueOf());
     if (cluster.type) {
         clusterData.type = cluster.type;
@@ -5232,7 +5204,7 @@ links.Timeline.prototype.stackOrder = function (items) {
 
     //if a customer stack order function exists, use it.
     var f = this.options.customStackOrder && (typeof this.options.customStackOrder === 'function') ? this.options.customStackOrder : function (a, b) {
-    
+
         if ((a instanceof links.Timeline.ItemRange || a instanceof links.Timeline.ItemFloatingRange) &&
             !(b instanceof links.Timeline.ItemRange || b instanceof links.Timeline.ItemFloatingRange)) {
             return -1;

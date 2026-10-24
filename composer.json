@@ -2,10 +2,8 @@
     "name": "webcodebg/magento2-cron-scheduler",
     "description": "Easily set up and manage cron jobs from the backend with a beautiful and managed timeline feature. Find the actual load on CPU/Memory by cron job execution.",
     "type": "magento2-module",
-    "version": "1.0.9",
-    "license": [
-        "OSL-3.0"
-    ],
+    "version": "2.1.3",
+    "license": ["OSL-3.0"],
     "minimum-stability": "dev",
     "authors": [
         {
@@ -15,17 +13,19 @@
             "role": "Leader"
         },
         {
-            "name": "Kostadin Bashev | Webcode",
+            "name": "Kostadin Bashev, Webcode",
             "email": "bashev@webcode.bg",
             "homepage": "https://webcode.bg/",
             "role": "Head Magento Developer"
         }
     ],
     "replace": {
-        "kiwicommerce/module-cron-scheduler": "*"
+        "kiwicommerce/module-cron-scheduler": "*",
+        "webcode/module-cron-scheduler": "*"
     },
     "require": {
-        "magento/framework": ">=100.0.0",
+        "php": "^8.3",
+        "magento/framework": ">=103.0.4",
         "magento/module-backend": ">=100.0.0",
         "magento/module-cron": ">=100.0.0"
     },
@@ -43,8 +43,7 @@
             "registration.php"
         ],
         "psr-4": {
-            "KiwiCommerce\\CronScheduler\\": ""
+            "Webcode\\CronScheduler\\": ""
         }
     }
 }
-

@@ -1,45 +1,37 @@
 <?php
 
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Ui\Component\Listing\Column\Status;
+declare(strict_types=1);
 
-/**
- * Class Options
- * @package KiwiCommerce\CronScheduler\Ui\Component\Listing\Column\Status
- */
-class Options implements \Magento\Framework\Data\OptionSourceInterface
+namespace Webcode\CronScheduler\Ui\Component\Listing\Column\Status;
+
+use Magento\Framework\Data\OptionSourceInterface;
+use Webcode\CronScheduler\Model\ResourceModel\Schedule\Collection;
+use Webcode\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory;
+
+class Options implements OptionSourceInterface
 {
     /**
-     * @var array
+     * @var array|null
      */
-    public $options = null;
+    private ?array $options = null;
 
     /**
-     * @var \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory
+     * @var Collection
      */
-    public $scheduleCollectionFactory = null;
+    private readonly Collection $scheduleCollection;
 
-    /**
-     * Options constructor.
-     * @param \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $scheduleCollectionFactory
-     */
     public function __construct(
-        \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $scheduleCollectionFactory
+        CollectionFactory $scheduleCollectionFactory
     ) {
-    
-        $this->scheduleCollectionFactory = $scheduleCollectionFactory->create();
+        $this->scheduleCollection = $scheduleCollectionFactory->create();
     }
 
     /**
@@ -50,7 +42,7 @@ class Options implements \Magento\Framework\Data\OptionSourceInterface
     {
         if ($this->options === null) {
             $this->options = [];
-            $scheduleTaskStatuses = $this->scheduleCollectionFactory->getScheduleTaskStatuses();
+            $scheduleTaskStatuses = $this->scheduleCollection->getScheduleTaskStatuses();
 
             foreach ($scheduleTaskStatuses as $scheduleTaskStatus) {
                 $status = $scheduleTaskStatus->getStatus();

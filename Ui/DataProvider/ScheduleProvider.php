@@ -1,27 +1,26 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Ui\DataProvider;
+namespace Webcode\CronScheduler\Ui\DataProvider;
+
+use Magento\Ui\DataProvider\AbstractDataProvider;
+use Webcode\CronScheduler\Model\ResourceModel\Schedule\Collection;
+use Webcode\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory;
 
 /**
  * Class ScheduleProvider
- * @package KiwiCommerce\CronScheduler\Ui\DataProvider
+ * @package Webcode\CronScheduler\Ui\DataProvider
  */
-class ScheduleProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
+class ScheduleProvider extends AbstractDataProvider
 {
     /**
-     * @var \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\Collection
+     * @var Collection
      */
     protected $collection;
 
@@ -30,7 +29,7 @@ class ScheduleProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
      * @param string $name
      * @param string $primaryFieldName
      * @param string $requestFieldName
-     * @param \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $collectionFactory
+     * @param CollectionFactory $collectionFactory
      * @param array $meta
      * @param array $data
      */
@@ -38,7 +37,7 @@ class ScheduleProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
         $name,
         $primaryFieldName,
         $requestFieldName,
-        \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $collectionFactory,
+        CollectionFactory $collectionFactory,
         array $meta = [],
         array $data = []
     ) {

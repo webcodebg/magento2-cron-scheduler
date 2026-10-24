@@ -1,0 +1,14 @@
+{
+    "cron_schedule": {
+        "column": {
+            "pid": true,
+            "memory_usage": true,
+            "cpu_usage": true,
+            "system_usage": true,
+            "is_mail_sent": true,
+            "error_message": true,
+            "error_file": true,
+            "error_line": true
+        }
+    }
+}

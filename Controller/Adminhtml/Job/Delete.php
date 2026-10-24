@@ -1,86 +1,69 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Controller\Adminhtml\Job;
+namespace Webcode\CronScheduler\Controller\Adminhtml\Job;
+
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\ResponseInterface;
+use Webcode\CronScheduler\Service\Cronjob;
+use Webcode\CronScheduler\Model\Job;
+use Webcode\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory;
 
 /**
  * Class Delete
- * @package KiwiCommerce\CronScheduler\Controller\Adminhtml\Job
+ *
+ * @package Webcode\CronScheduler\Controller\Adminhtml\Job
  */
-class Delete extends \Magento\Backend\App\Action
+class Delete extends Action
 {
-    /**
-     * @var \Magento\Framework\App\Cache\TypeListInterface
-     */
-    public $cacheTypeList;
-
     /**
      * @var string
      */
     protected $aclResource = "job_deletejob";
 
     /**
-     * @var \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory
-     */
-    public $scheduleCollectionFactory = null;
-
-    /**
-     * @var \KiwiCommerce\CronScheduler\Model\Job
-     */
-    public $jobModel;
-
-    /**
-     * @var \KiwiCommerce\CronScheduler\Helper\Cronjob
-     */
-    public $jobHelper = null;
-
-    /**
      * Class constructor
-     * @param \Magento\Backend\App\Action\Context $context
-     * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
-     * @param \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $scheduleCollectionFactory
-     * @param \KiwiCommerce\CronScheduler\Helper\Cronjob $jobHelper
-     * @param \KiwiCommerce\CronScheduler\Model\Job $jobModel
+     *
+     * @param Context $context
+     * @param TypeListInterface $cacheTypeList
+     * @param CollectionFactory $scheduleCollectionFactory
+     * @param Cronjob $jobHelper
+     * @param Job $jobModel
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
-        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
-        \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $scheduleCollectionFactory,
-        \KiwiCommerce\CronScheduler\Helper\Cronjob $jobHelper,
-        \KiwiCommerce\CronScheduler\Model\Job $jobModel
+        Context $context,
+        private readonly TypeListInterface $cacheTypeList,
+        private readonly CollectionFactory $scheduleCollectionFactory,
+        private readonly Cronjob $jobHelper,
+        private readonly Job $jobModel
     ) {
-        $this->cacheTypeList = $cacheTypeList;
-        $this->jobHelper = $jobHelper;
-        $this->scheduleCollectionFactory = $scheduleCollectionFactory;
-        $this->jobModel = $jobModel;
         parent::__construct($context);
     }
 
     /**
      * Is action allowed?
+     *
      * @return boolean
      */
-    protected function _isAllowed()
+    protected function _isAllowed(): bool
     {
-        return $this->_authorization->isAllowed('KiwiCommerce_CronScheduler::'.$this->aclResource);
+        return $this->_authorization->isAllowed('Webcode_CronScheduler::' . $this->aclResource);
     }
 
     /**
      * Execute action
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
+     *
+     * @return ResponseInterface
      */
-    public function execute()
+    public function execute(): ResponseInterface
     {
         $jobcode = $this->getRequest()->getParam('job_code');
         $group = $this->getRequest()->getParam('group');
