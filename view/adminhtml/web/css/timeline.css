@@ -1,15 +1,10 @@
-/**
-* KiwiCommerce
-*
-* Do not edit or add to this file if you wish to upgrade to newer versions in the future.
-* If you wish to customise this module for your needs.
-* Please contact us https://kiwicommerce.co.uk/contacts.
-*
-* @category   KiwiCommerce
-* @package    KiwiCommerce_CronScheduler
-* @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
-* @license    https://kiwicommerce.co.uk/magento2-extension-license/
-*/
+/*
+ * @package      Webcode_CronScheduler
+ *
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
+ */
 
 div.timeline-frame {
     -moz-box-sizing: border-box;
@@ -172,7 +167,7 @@ div.timeline-navigation {
     border-radius: 2px;
     box-sizing: border-box;
     color: #808080;
-    font-family: arial;
+    font-family: arial, serif;
     font-size: 20px;
     font-weight: bold;
 }
@@ -194,44 +189,48 @@ div.timeline-navigation-move-right {
 }
 
 div.timeline-event {
-    min-width: 1px;
-    padding: 0px;
+    min-width: 2px;
+    padding: 0;
     height: 36px;
 }
 
 div.timeline-event.success {
-    background:green;
-    border-color:green;
+    background: green;
+    border-color: green;
 }
+
 div.timeline-event.missed,
 div.timeline-event.error {
-    background:red;
-    border-color:red;
+    background: red;
+    border-color: red;
 }
+
 div.timeline-event.running {
     background: #ffd400;
     border-color: #ffd400;
 }
 
 div.timeline-event.pending {
-    background:#ea992e;
-    border-color:#ea992e;
-}
-.timeline-content {
-    border: 0px solid transparent !important;
+    background: #ea992e;
+    border-color: #ea992e;
 }
 
-#kiwicommercetimeline-tooltip {
-    background:white;
-    border: 1px solid black;
-    padding:5px;
+.timeline-content {
+    border: 0 solid transparent !important;
 }
-#kiwicommercetimeline-tooltip table td {
-    padding:3px;
+
+#cron-scheduler-timeline-tooltip {
+    background: white;
+    border: 1px solid black;
+    padding: 5px;
+}
+
+#cron-scheduler-timeline-tooltip table td {
+    padding: 3px;
     top: -5px;
     left: 105%;
 }
 
-#kiwicommercetimeline-tooltip table tr td:first-child {
+#cron-scheduler-timeline-tooltip table tr td:first-child {
     font-weight: bold;
 }

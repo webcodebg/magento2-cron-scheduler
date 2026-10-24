@@ -1,40 +1,31 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Controller\Adminhtml\Job;
+namespace Webcode\CronScheduler\Controller\Adminhtml\Job;
+
+use Exception;
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultInterface;
+use Webcode\CronScheduler\Service\Cronjob;
+use Webcode\CronScheduler\Model\Job;
 
 /**
  * Class MassStatusDisable
- * @package KiwiCommerce\CronScheduler\Controller\Adminhtml\Job
+ *
+ * @package Webcode\CronScheduler\Controller\Adminhtml\Job
  */
-class MassStatusDisable extends \Magento\Backend\App\Action
+class MassStatusDisable extends Action implements HttpPostActionInterface
 {
-    /**
-     * @var \KiwiCommerce\CronScheduler\Helper\Schedule
-     */
-    public $jobHelper = null;
-
-    /**
-     * @var \KiwiCommerce\CronScheduler\Model\Job
-     */
-    public $jobModel;
-
-    /**
-     * @var \Magento\Framework\App\Cache\TypeListInterface
-     */
-    public $cacheTypeList;
-
     /**
      * @var string
      */
@@ -47,35 +38,35 @@ class MassStatusDisable extends \Magento\Backend\App\Action
 
     /**
      * Class constructor.
-     * @param \Magento\Backend\App\Action\Context $context
-     * @param \KiwiCommerce\CronScheduler\Model\Job $jobModel
-     * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
-     * @param \KiwiCommerce\CronScheduler\Helper\Cronjob $jobHelper
+     *
+     * @param Context $context
+     * @param Job $jobModel
+     * @param TypeListInterface $cacheTypeList
+     * @param Cronjob $jobHelper
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
-        \KiwiCommerce\CronScheduler\Model\Job $jobModel,
-        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
-        \KiwiCommerce\CronScheduler\Helper\Cronjob $jobHelper
+        Context $context,
+        private readonly Job $jobModel,
+        private readonly TypeListInterface $cacheTypeList,
+        private readonly Cronjob $jobHelper
     ) {
-        $this->jobHelper = $jobHelper;
-        $this->jobModel = $jobModel;
-        $this->cacheTypeList = $cacheTypeList;
         parent::__construct($context);
     }
 
     /**
      * Is action allowed?
+     *
      * @return boolean
      */
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('KiwiCommerce_CronScheduler::'.$this->aclResource);
+        return $this->_authorization->isAllowed('Webcode_CronScheduler::' . $this->aclResource);
     }
 
     /**
      * Execute action
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
+     *
+     * @return ResponseInterface|ResultInterface
      */
     public function execute()
     {
@@ -91,6 +82,7 @@ class MassStatusDisable extends \Magento\Backend\App\Action
 
         if (empty($jobCodes)) {
             $this->messageManager->addErrorMessage(__('Selected jobs can not be disabled.'));
+
             return $this->_redirect('*/*/listing');
         }
 
@@ -101,10 +93,12 @@ class MassStatusDisable extends \Magento\Backend\App\Action
             }
             $this->cacheTypeList->cleanType('config');
             $this->messageManager->addSuccessMessage(__('You disabled selected jobs.'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
+
             return $this->_redirect('*/*/listing');
         }
+
         return $this->_redirect('*/*/listing');
     }
 }

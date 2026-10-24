@@ -1,0 +1,30 @@
+"Allow/disallow to get email in case of cron execution error or missed cron.","Разрешава или забранява получаването на имейл при грешка в изпълнението на cron задача или при пропусната задача."
+"Enter comma separated email address to get email on multiple addresses.","Въведете имейл адреси, разделени със запетая, за да получавате известия на няколко адреса."
+"Allow/disallow to show top running jobs on dashboard.","Разрешава или забранява показването на най-активните cron задачи в таблото."
+"Enter comma separated cron expressions to get email more than once.<br/>
+<pre>
+* * * * *
+| | | | |
+| | | | +---- Day of the Week   (range: 0-6, 1 standing for Monday)
+| | | +------ Month of the Year (range: 1-12)
+| | +-------- Day of the Month  (range: 1-31)
+| +---------- Hour              (range: 0-23)
++------------ Minute            (range: 0-59)
+Example: 0 0 * * * Daily at midnight
+</pre>","Въведете cron изрази, разделени със запетая, за да получавате имейл повече от веднъж.<br/>
+<pre>
+* * * * *
+| | | | |
+| | | | +---- Day of the Week   (range: 0-6, 1 standing for Monday)
+| | | +------ Month of the Year (range: 1-12)
+| | +-------- Day of the Month  (range: 1-31)
+| +---------- Hour              (range: 0-23)
++------------ Minute            (range: 0-59)
+Example: 0 0 * * * Daily at midnight
+</pre>"
+"Enable Selected Jobs","Активирай избраните задачи"
+"Disable Selected Jobs","Деактивирай избраните задачи"
+"Max Runtime (minutes)","Максимално време за изпълнение (минути)"
+"A running job older than this is killed. Empty: the default from Stores > Configuration > Cron Scheduler. 0: never killed.","Задача, която тече по-дълго от това, се спира принудително. Празно: стойността по подразбиране от Stores > Configuration > Cron Scheduler. 0: никога не се спира."
+"Kill Jobs Running Longer Than (minutes)","Спирай задачи, работещи по-дълго от (минути)"
+"Checked every 15 minutes. 0 means never. A job can override it in its own edit form (Max Runtime). Default 180.","Проверява се на всеки 15 минути. 0 означава никога. Всяка задача може да има собствена стойност във формата си (Max Runtime). По подразбиране 180."

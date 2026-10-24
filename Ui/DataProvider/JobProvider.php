@@ -1,24 +1,28 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Ui\DataProvider;
+declare(strict_types=1);
+
+namespace Webcode\CronScheduler\Ui\DataProvider;
+
+use Magento\Framework\Api\Filter;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Filesystem\Directory\ReadFactory;
+use Magento\Ui\DataProvider\AbstractDataProvider;
+use Webcode\CronScheduler\Service\Cronjob;
 
 /**
  * Class JobProvider
- * @package KiwiCommerce\CronScheduler\Ui\DataProvider
+ *
+ * @package Webcode\CronScheduler\Ui\DataProvider
  */
-class JobProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
+class JobProvider extends AbstractDataProvider
 {
     /**
      * @var integer
@@ -51,28 +55,24 @@ class JobProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
     protected $sortDir = 'asc';
 
     /**
-     * @var \Magento\Framework\App\Filesystem\DirectoryList
+     * @var DirectoryList
      */
     private $directoryList = null;
 
     /**
-     * @var \Magento\Framework\Filesystem\Directory\ReadFactory
+     * @var ReadFactory
      */
     private $directoryRead = null;
 
     /**
-     * @var \KiwiCommerce\CronScheduler\Helper\Cronjob
-     */
-    public $jobHelper = null;
-
-    /**
      * Class constructor
+     *
      * @param string $name
      * @param string $primaryFieldName
      * @param string $requestFieldName
-     * @param \Magento\Framework\Filesystem\Directory\ReadFactory $directoryRead
-     * @param \Magento\Framework\App\Filesystem\DirectoryList $directoryList
-     * @param \Magento\Cron\Model\ConfigInterface $jobHelper
+     * @param ReadFactory $directoryRead
+     * @param DirectoryList $directoryList
+     * @param Cronjob $jobHelper
      * @param array $meta
      * @param array $data
      */
@@ -80,20 +80,20 @@ class JobProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
         $name,
         $primaryFieldName,
         $requestFieldName,
-        \Magento\Framework\Filesystem\Directory\ReadFactory $directoryRead,
-        \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
-        \KiwiCommerce\CronScheduler\Helper\Cronjob $jobHelper,
+        ReadFactory $directoryRead,
+        DirectoryList $directoryList,
+        private readonly Cronjob $jobHelper,
         array $meta = [],
         array $data = []
     ) {
         $this->directoryRead = $directoryRead;
         $this->directoryList = $directoryList;
-        $this->jobHelper = $jobHelper;
         parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
     }
 
     /**
      * Set the limit of the collection
+     *
      * @param int $offset
      * @param int $size
      */
@@ -107,28 +107,30 @@ class JobProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
 
     /**
      * Get the collection
+     *
      * @return array
      */
-    public function getData()
+    public function getData(): array
     {
         $data = array_values($this->jobHelper->getJobData());
 
         $totalRecords = count($data);
 
-        #sorting
         $sortField = $this->sortField;
         $sortDir = $this->sortDir;
-        usort($data, function ($a, $b) use ($sortField, $sortDir) {
-            if ($sortDir == "asc") {
-                return $a[$sortField] > $b[$sortField];
-            } else {
-                return $a[$sortField] < $b[$sortField];
+        usort($data, static function($a, $b) use ($sortField, $sortDir)
+        {
+            if ($sortDir === "asc") {
+                return $a[$sortField] > $b[$sortField] ? 1 : -1;
             }
+
+            return $a[$sortField] < $b[$sortField] ? 1 : -1;
         });
 
         #filters
         foreach ($this->likeFilters as $column => $value) {
-            $data = array_filter($data, function ($item) use ($column, $value) {
+            $data = array_filter($data, function($item) use ($column, $value)
+            {
                 return stripos($item[$column], $value) !== false;
             });
         }
@@ -144,23 +146,25 @@ class JobProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
 
     /**
      * Add filters to the collection
-     * @param \Magento\Framework\Api\Filter $filter
+     *
+     * @param Filter $filter
      */
-    public function addFilter(\Magento\Framework\Api\Filter $filter)
+    public function addFilter(Filter $filter)
     {
-        if ($filter->getConditionType() == "like") {
+        if ($filter->getConditionType() === 'like') {
             $this->likeFilters[$filter->getField()] = substr($filter->getValue(), 1, -1);
-        } elseif ($filter->getConditionType() == "eq") {
+        } elseif ($filter->getConditionType() === 'eq') {
             $this->likeFilters[$filter->getField()] = $filter->getValue();
-        } elseif ($filter->getConditionType() == "gteq") {
+        } elseif ($filter->getConditionType() === 'gteq') {
             $this->rangeFilters[$filter->getField()]['from'] = $filter->getValue();
-        } elseif ($filter->getConditionType() == "lteq") {
+        } elseif ($filter->getConditionType() === 'lteq') {
             $this->rangeFilters[$filter->getField()]['to'] = $filter->getValue();
         }
     }
 
     /**
      * Set the order of the collection
+     *
      * @param string $field
      * @param string $direction
      */

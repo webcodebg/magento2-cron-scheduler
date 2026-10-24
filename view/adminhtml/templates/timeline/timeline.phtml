@@ -1,84 +1,127 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
+
+/** @var \Webcode\CronScheduler\Block\Adminhtml\Schedule\Timeline $block */
+$data = $block->getCronJobData();
 ?>
 
-<script type="text/javascript">
+<div class="page-main-actions cron-scheduler-timeline-actions"
+     style="display: flex; justify-content: flex-end; gap: 8px; margin: 0 0 15px;">
+    <?= /* @noEscape */ $block->getCronJobsButtonHtml() ?>
+    <?= /* @noEscape */ $block->getCleanLogsButtonHtml() ?>
+    <?= /* @noEscape */ $block->getRegenerateButtonHtml() ?>
+</div>
 
-    google.load("visualization", "1");
+<div id="cron-scheduler-timeline"></div>
+<div id="cron-scheduler-timeline-tooltip" style="position:absolute; z-index: 99999; display:none"></div>
 
-    // Set callback to run when API is loaded
-    google.setOnLoadCallback(draw);
-
-    <?php $data = $block->getCronJobData();?>
-    var jsonData = <?php echo json_encode($data); ?>;
-
-    function draw() {
-
-        var options = {
-            stackEvents: false,
-            start: new Date(),
-            end: new Date(1000 * 60 * 60 * 24 + (new Date()).valueOf()),
-            animate: false,
-            eventMargin: 10,
-            eventMarginAxis: 5,
-            showMajorLabels: false,
-            cluster: false,
-            axisOnTop: true,
-            snapEvents: true,
-            dragAreaWidth: 20,
-            groupMinHeight: 35,
-            selectable: false,
-            zoomMin: 0,
-            zoomMax: 1000 * 60 * 60 * 2
-        };
-
-        var timeline = new links.Timeline(document.getElementById('kiwicommercetimeline'), options);
-        timeline.setCurrentTime(<?php echo $block->getDateWithJs(); ?>);
-
-        // Create and populate a data table.
-        var data = new google.visualization.DataTable();
-        data.addColumn('datetime', 'start');
-        data.addColumn('datetime', 'end');
-        data.addColumn('string', 'content');
-        data.addColumn('string', 'group');
-        data.addColumn('string', 'className');
-
-        <?php $i = 0; foreach ($data as $row) : ?>
-        data.addRow([<?php echo $row[3]; ?>, <?php echo $row[4]; ?>, '', '<?php echo $row[0]; ?>', '<?php echo $i++ . " " . $row[1]; ?>']);
-        <?php endforeach; ?>
-
-        timeline.draw(data);
-    }
-</script>
-<div id="kiwicommercetimeline"></div>
-<div id="kiwicommercetimeline-tooltip" style="position:absolute; z-index: 99999; display:none"></div>
 <script>
     require(["jquery", "jquery/ui"], function ($) {
+        // Tooltip lookup table: event index => pre-rendered tooltip markup. Every value
+        // interpolated into that markup is already escaped by the block, so it is escaped
+        // here for the *script* context only: escapeJs hex-encodes every angle bracket and
+        // slash, which is what stops a closing script tag inside a tooltip from ending this
+        // block early. jQuery.html() turns it back into the same markup at runtime. Only
+        // this one column is shipped — the JS never touched the other five.
+        var tooltips = [
+            <?php foreach ($data as $row): ?>
+            '<?= $escaper->escapeJs($row[2]) ?>',
+            <?php endforeach; ?>
+        ];
+
+        // Dates cross into JS as plain integers and are assembled here, so nothing but
+        // digits reaches the script block. See Timeline::getJsDateParts().
+        function toDate(parts) {
+            return new Date(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+        }
+
+        // Never zoom tighter than this, so a handful of near-simultaneous tasks don't
+        // blow up to a seconds-wide, unreadable window.
+        var MIN_WINDOW_MS = 1000 * 60 * 30; // 30 minutes
+
+        function drawTimeline() {
+            var options = {
+                stackEvents: false,
+                animate: false,
+                eventMargin: 10,
+                eventMarginAxis: 5,
+                // Show the date above the time labels on the axis.
+                showMajorLabels: true,
+                cluster: false,
+                axisOnTop: true,
+                snapEvents: true,
+                dragAreaWidth: 20,
+                groupMinHeight: 35,
+                selectable: false,
+                zoomMin: 1000 * 60,               // 1 minute
+                zoomMax: 1000 * 60 * 60 * 24 * 7  // 1 week — lets the view span the full data range
+            };
+
+            var timeline = new links.Timeline(document.getElementById('cron-scheduler-timeline'), options);
+            var currentTime = toDate([
+                <?php foreach ($block->getCurrentDateParts() as $part): ?><?= (int) $part ?>,<?php endforeach; ?>
+            ]);
+            timeline.setCurrentTime(currentTime);
+
+            // The links.Timeline library natively renders a plain array of events,
+            // so no Google Visualization DataTable (deprecated jsapi loader) is needed.
+            var events = [
+                <?php $i = 0; foreach ($data as $row): ?>
+                {
+                    start: toDate([<?php foreach ($row[3] as $part): ?><?= (int) $part ?>,<?php endforeach; ?>]),
+                    end: toDate([<?php foreach ($row[4] as $part): ?><?= (int) $part ?>,<?php endforeach; ?>]),
+                    content: '',
+                    group: '<a href="<?= $escaper->escapeUrl($block->getJobEditUrl($row[0])) ?>" title="<?= $escaper->escapeHtmlAttr(__('Edit cron job')) ?>"><?= $escaper->escapeHtml($row[0]) ?></a>',
+                    className: '<?= $escaper->escapeJs($i++ . ' ' . $row[1]) ?>'
+                },
+                <?php endforeach; ?>
+            ];
+
+            timeline.draw(events);
+
+            // Frame the view between the events: from the oldest task to the newest.
+            // In the normal case (a healthy cron) that span is small (~2h); the date on
+            // the axis keeps it readable even when it happens to be longer. A minimum
+            // span keeps very tight clusters from over-zooming.
+            if (events.length) {
+                var oldest = events[0].start.valueOf();
+                var newest = events[0].end.valueOf();
+                events.forEach(function (event) {
+                    oldest = Math.min(oldest, event.start.valueOf());
+                    newest = Math.max(newest, event.end.valueOf());
+                });
+
+                var span = Math.max(newest - oldest, MIN_WINDOW_MS);
+                var pad = span * 0.04; // ~4% breathing room on each side
+
+                timeline.setVisibleChartRange(new Date(oldest - pad), new Date(oldest + span + pad));
+            }
+        }
+
         $(function () {
+            drawTimeline();
 
             $(document).on('mousemove', '.timeline-event', function (evt) {
                 var classnames = $(this).attr('class').split(' ');
                 if (classnames.length === 6) {
-                    $('#kiwicommercetimeline-tooltip').css({display: "block", top: (evt.pageY + 5) + "px", left: (evt.pageX + 5) + "px"});
-                    $('#kiwicommercetimeline-tooltip').html(jsonData[classnames[4]][2]);
+                    $('#cron-scheduler-timeline-tooltip').css({
+                        display: "block",
+                        top: (evt.pageY + 5) + "px",
+                        left: (evt.pageX + 5) + "px"
+                    });
+                    $('#cron-scheduler-timeline-tooltip').html(tooltips[classnames[4]]);
                 }
             });
 
-            $(document).on('mouseout', '.timeline-event', function (evt) {
-                $('#kiwicommercetimeline-tooltip').css({display: "none"});
+            $(document).on('mouseout', '.timeline-event', function () {
+                $('#cron-scheduler-timeline-tooltip').css({display: "none"});
             });
-
         });
     });
 </script>

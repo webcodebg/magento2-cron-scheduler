@@ -1,38 +1,28 @@
 <?xml version="1.0"?>
 <!--
- /**
- * KiwiCommerce
- *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
- */
--->
+  ~ @package      Webcode_CronScheduler
+  ~
+  ~ @author       Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+  ~ @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
+  -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
-        <tab id="kiwicommerce" translate="label" sortOrder="9999">
-            <label><![CDATA[KiwiCommerce Extensions]]></label>
+        <tab id="webcode" translate="label" sortOrder="1000">
+            <label>Webcode</label>
         </tab>
         <section id="cronscheduler" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Cron Scheduler</label>
-            <tab>kiwicommerce</tab>
-            <resource>KiwiCommerce_CronScheduler::cronscheduler_configuration</resource>
-            <group id="hint" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
-                <frontend_model>KiwiCommerce\CronScheduler\Block\Adminhtml\System\Config\Fieldset\Hint</frontend_model>
-            </group>
+            <tab>webcode</tab>
+            <resource>Webcode_CronScheduler::cronscheduler_configuration</resource>
             <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>General</label>
-                <field id="cronscheduler_email_enabled" translate="Receive Email" type="select" sortOrder="10" showInDefault="1">
+                <field id="cronscheduler_email_enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1">
                     <label>Receive Email on Error</label>
                     <comment>Allow/disallow to get email in case of cron execution error or missed cron.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="cronscheduler_admin_email" translate="Admin Email" type="text" sortOrder="20" showInDefault="1">
+                <field id="cronscheduler_admin_email" translate="label comment" type="text" sortOrder="20" showInDefault="1">
                     <label>Receive Email On</label>
                     <comment>Enter comma separated email address to get email on multiple addresses.</comment>
                     <validate>required-entry validate-comma-separated-emails</validate>
@@ -40,11 +30,16 @@
                         <field id="cronscheduler_email_enabled">1</field>
                     </depends>
                 </field>
-                <field id="schedule" translate="Email Cronexpression" type="text" sortOrder="30" showInDefault="1">
+                <field id="schedule" translate="label comment" type="text" sortOrder="30" showInDefault="1">
                     <label>Receive Email At</label>
                     <validate>required-entry</validate>
-                    <comment><![CDATA[
-                    Enter comma separated cron expressions to get email more than once.<br/>
+                    <!--
+                        The msgid must start and end exactly where the text does: Config's DOM
+                        converter assigns the node verbatim (no trim), so a leading newline or a
+                        trailing indent travels into the msgid and no CSV row can ever match it.
+                        The line breaks inside the <pre> block are the diagram and stay.
+                    -->
+                    <comment><![CDATA[Enter comma separated cron expressions to get email more than once.<br/>
 <pre>
 * * * * *
 | | | | |
@@ -54,16 +49,20 @@
 | +---------- Hour              (range: 0-23)
 +------------ Minute            (range: 0-59)
 Example: 0 0 * * * Daily at midnight
-</pre>
-                            ]]></comment>
+</pre>]]></comment>
                     <depends>
                         <field id="cronscheduler_email_enabled">1</field>
                     </depends>
                 </field>
-                <field id="cronscheduler_dashboard_enabled" translate="Show top cron on dashboard" type="select" sortOrder="40" showInDefault="1">
+                <field id="cronscheduler_dashboard_enabled" translate="label comment" type="select" sortOrder="40" showInDefault="1">
                     <label>Show Cron Jobs on Dashboard</label>
                     <comment>Allow/disallow to show top running jobs on dashboard.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="max_runtime" translate="label comment" type="text" sortOrder="50" showInDefault="1">
+                    <label>Kill Jobs Running Longer Than (minutes)</label>
+                    <comment>Checked every 15 minutes. 0 means never. A job can override it in its own edit form (Max Runtime). Default 180.</comment>
+                    <validate>validate-digits</validate>
                 </field>
             </group>
         </section>

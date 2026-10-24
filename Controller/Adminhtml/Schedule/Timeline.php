@@ -1,32 +1,22 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Controller\Adminhtml\Schedule;
+namespace Webcode\CronScheduler\Controller\Adminhtml\Schedule;
 
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\View\Result\Page;
+use Webcode\CronScheduler\Service\Schedule;
 
-/**
- * Class Timeline
- * @package KiwiCommerce\CronScheduler\Controller\Adminhtml\Schedule
- */
-class Timeline extends \Magento\Backend\App\Action
+class Timeline extends Action
 {
-    /**
-     * @var \KiwiCommerce\CronScheduler\Helper\Schedule
-     */
-    public $scheduleHelper = null;
-
     /**
      * @var string
      */
@@ -34,29 +24,31 @@ class Timeline extends \Magento\Backend\App\Action
 
     /**
      * Class constructor.
-     * @param \Magento\Backend\App\Action\Context $context
-     * @param \KiwiCommerce\CronScheduler\Helper\Schedule $scheduleHelper
+     *
+     * @param Context $context
+     * @param Schedule $scheduleHelper
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
-        \KiwiCommerce\CronScheduler\Helper\Schedule $scheduleHelper
+        Context $context,
+        private readonly Schedule $scheduleHelper
     ) {
-        $this->scheduleHelper = $scheduleHelper;
         parent::__construct($context);
     }
 
     /**
      * Is action allowed?
+     *
      * @return boolean
      */
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('KiwiCommerce_CronScheduler::'.$this->aclResource);
+        return $this->_authorization->isAllowed('Webcode_CronScheduler::' . $this->aclResource);
     }
 
     /**
      * Action to display timeline
-     * @return \Magento\Framework\View\Result\Page
+     *
+     * @return Page
      */
     public function execute()
     {
@@ -65,6 +57,7 @@ class Timeline extends \Magento\Backend\App\Action
         $resultPage->setActiveMenu("Magento_Backend::system");
         $resultPage->getConfig()->getTitle()->prepend(__('Cron Scheduler Timeline'));
         $resultPage->addBreadcrumb(__('CronScheduler'), __('CronScheduler'));
+
         return $resultPage;
     }
 }

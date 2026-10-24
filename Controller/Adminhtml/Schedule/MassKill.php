@@ -1,41 +1,37 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
-namespace KiwiCommerce\CronScheduler\Controller\Adminhtml\Schedule;
+
+namespace Webcode\CronScheduler\Controller\Adminhtml\Schedule;
+
+use Exception;
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Cron\Model\Schedule;
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Ui\Component\MassAction\Filter;
+use Webcode\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory;
 
 /**
  * Class MassKill
- * @package KiwiCommerce\CronScheduler\Controller\Adminhtml\Schedule
  */
-class MassKill extends \Magento\Backend\App\Action
+class MassKill extends Action implements HttpPostActionInterface
 {
     /**
      * Constant for status killed
      */
-    const STATUS_KILLED = 'killed';
+    private const STATUS_KILLED = 'killed';
 
     /**
-     * @var \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory
-     */
-    public $scheduleCollectionFactory = null;
-
-    /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    public $dateTime;
-
-    /**
-     * @var \Magento\Ui\Component\MassAction\Filter
+     * @var Filter
      */
     protected $filter;
 
@@ -46,36 +42,37 @@ class MassKill extends \Magento\Backend\App\Action
 
     /**
      * Class constructor.
-     * @param \Magento\Backend\App\Action\Context $context
-     * @param \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $scheduleCollectionFactory
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
-     * @param \Magento\Ui\Component\MassAction\Filter $filter
+     *
+     * @param Context $context
+     * @param CollectionFactory $scheduleCollectionFactory
+     * @param DateTime $dateTime
+     * @param Filter $filter
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
-        \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $scheduleCollectionFactory,
-        \Magento\Framework\Stdlib\DateTime\DateTime $dateTime,
-        \Magento\Ui\Component\MassAction\Filter $filter
+        Context $context,
+        private readonly CollectionFactory $scheduleCollectionFactory,
+        private readonly DateTime $dateTime,
+        Filter $filter
     ) {
-        $this->scheduleCollectionFactory = $scheduleCollectionFactory;
-        $this->dateTime = $dateTime;
         $this->filter = $filter;
         parent::__construct($context);
     }
 
     /**
      * Is action allowed?
+     *
      * @return boolean
      */
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('KiwiCommerce_CronScheduler::'.$this->aclResource);
+        return $this->_authorization->isAllowed('Webcode_CronScheduler::' . $this->aclResource);
     }
 
     /**
      * Execute action
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     *
+     * @return ResponseInterface
+     * @throws LocalizedException
      */
     public function execute()
     {
@@ -91,11 +88,12 @@ class MassKill extends \Magento\Backend\App\Action
 
         if (empty($ids)) {
             $this->messageManager->addErrorMessage(__('Selected jobs can not be killed.'));
+
             return $this->_redirect('*/*/listing');
         }
 
         try {
-            $collection->addFieldToFilter('status', \Magento\Cron\Model\Schedule::STATUS_RUNNING)
+            $collection->addFieldToFilter('status', Schedule::STATUS_RUNNING)
                 ->addFieldToFilter(
                     'finished_at',
                     ['null' => true]
@@ -104,7 +102,7 @@ class MassKill extends \Magento\Backend\App\Action
                     'schedule_id',
                     ['in' => $ids]
                 )
-                ->addFieldToSelect(['schedule_id','pid'])
+                ->addFieldToSelect(['schedule_id', 'pid'])
                 ->load();
 
             $killedJobData = $collection->getData();
@@ -119,7 +117,7 @@ class MassKill extends \Magento\Backend\App\Action
                 if (function_exists('posix_getsid') && posix_getsid($pid) === false) {
                     $errorScheduleIds[] = $scheduleId;
                 } else {
-                    $finished_at = strftime('%Y-%m-%d %H:%M:%S', $this->dateTime->gmtTimestamp());
+                    $finished_at = $this->dateTime->gmtDate('Y-m-d H:i:s');
                     $dbrunningjobs->setData('status', self::STATUS_KILLED);
                     $dbrunningjobs->setData('messages', __('It is killed by admin.'));
                     $dbrunningjobs->setData('finished_at', $finished_at);
@@ -130,15 +128,26 @@ class MassKill extends \Magento\Backend\App\Action
                 }
             }
             if (!empty($killedScheduleIds)) {
-                $this->messageManager->addSuccessMessage(__('A total of %1 record(s) have been killed - ' . join(',', $killedScheduleIds), count($killedScheduleIds)));
+                $this->messageManager->addSuccessMessage(
+                    __(
+                        'A total of %1 record(s) have been killed - ' . join(',', $killedScheduleIds),
+                        count($killedScheduleIds)
+                    )
+                );
             }
             if (!empty($errorScheduleIds)) {
-                $this->messageManager->addErrorMessage(__('A total of %1 record(s) can not be killed - ' . join(',', $errorScheduleIds), count($errorScheduleIds)));
+                $this->messageManager->addErrorMessage(
+                    __(
+                        'A total of %1 record(s) can not be killed - ' . join(',', $errorScheduleIds),
+                        count($errorScheduleIds)
+                    )
+                );
             }
 
             return $this->_redirect('*/*/listing');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
+
             return $this->_redirect('*/*/listing');
         }
     }

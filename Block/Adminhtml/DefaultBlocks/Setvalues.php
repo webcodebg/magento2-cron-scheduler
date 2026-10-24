@@ -1,53 +1,50 @@
 <?php
 
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
-namespace KiwiCommerce\CronScheduler\Block\Adminhtml\DefaultBlocks;
 
-/**
- * Class Setvalues
- * @package KiwiCommerce\CronScheduler\Block\Adminhtml\DefaultBlocks
- */
-class Setvalues extends \Magento\Framework\View\Element\Template
+declare(strict_types=1);
+
+namespace Webcode\CronScheduler\Block\Adminhtml\DefaultBlocks;
+
+use Exception;
+use Magento\Framework\App\DeploymentConfig\Reader;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\View\Element\Template\Context;
+
+class Setvalues extends Template
 {
     /**
-     * @var \Magento\Framework\App\DeploymentConfig\Reader
-     */
-    public $configReader;
-
-    /**
      * Class constructor.
-     * @param \Magento\Framework\View\Element\Template\Context $context
-     * @param \Magento\Framework\App\DeploymentConfig\Reader $configReader
+     *
+     * @param Context $context
+     * @param Reader $configReader
      */
     public function __construct(
-        \Magento\Framework\View\Element\Template\Context $context,
-        \Magento\Framework\App\DeploymentConfig\Reader $configReader
+        Context $context,
+        private readonly Reader $configReader
     ) {
-        $this->configReader = $configReader;
         parent::__construct($context);
     }
 
     /**
      * Get Admin URL
+     *
      * @return string
-     * @throws \Exception
-     * @throws \Magento\Framework\Exception\FileSystemException
+     * @throws Exception
+     * @throws FileSystemException
      */
-    public function getAdminBaseUrl()
+    public function getAdminBaseUrl(): string
     {
         $config = $this->configReader->load();
         $adminSuffix = $config['backend']['frontName'];
+
         return $this->getBaseUrl() . $adminSuffix . '/';
     }
 }

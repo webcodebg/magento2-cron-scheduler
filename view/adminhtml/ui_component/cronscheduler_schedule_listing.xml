@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- /**
- * KiwiCommerce
- *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
- */
--->
+  ~ @package      Webcode_CronScheduler
+  ~
+  ~ @author       Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+  ~ @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
+  -->
 <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
@@ -20,10 +13,18 @@
             <item name="deps" xsi:type="string">cronscheduler_schedule_listing.schedule_listing_data_source</item>
         </item>
         <item name="spinner" xsi:type="string">schedule_columns</item>
+        <item name="buttons" xsi:type="array">
+            <item name="cronjobs" xsi:type="array">
+                <item name="name" xsi:type="string">cronjobs</item>
+                <item name="label" xsi:type="string" translate="true">Cron Jobs</item>
+                <item name="class" xsi:type="string">secondary</item>
+                <item name="url" xsi:type="string">cronscheduler/job/listing</item>
+            </item>
+        </item>
     </argument>
     <dataSource name="schedule_listing_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">KiwiCommerce\CronScheduler\Ui\DataProvider\ScheduleProvider</argument>
+            <argument name="class" xsi:type="string">Webcode\CronScheduler\Ui\DataProvider\ScheduleProvider</argument>
             <argument name="name" xsi:type="string">schedule_listing_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">schedule_id</argument>
             <argument name="requestFieldName" xsi:type="string">schedule_id</argument>
@@ -151,7 +152,7 @@
         </column>
         <column name="job_code">
             <argument name="data" xsi:type="array">
-                <item name="options" xsi:type="object">KiwiCommerce\CronScheduler\Ui\Component\Listing\Column\Code\Options</item>
+                <item name="options" xsi:type="object">Webcode\CronScheduler\Ui\Component\Listing\Column\Code\Options</item>
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">select</item>
                     <item name="dataType" xsi:type="string">select</item>
@@ -163,12 +164,12 @@
         </column>
         <column name="status">
             <argument name="data" xsi:type="array">
-                <item name="options" xsi:type="object">KiwiCommerce\CronScheduler\Ui\Component\Listing\Column\Status\Options</item>
+                <item name="options" xsi:type="object">Webcode\CronScheduler\Ui\Component\Listing\Column\Status\Options</item>
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">select</item>
                     <item name="label" xsi:type="string" translate="true">Status</item>
                     <item name="dataType" xsi:type="string">select</item>
-                    <item name="bodyTmpl" xsi:type="string">KiwiCommerce_CronScheduler/schedule/status</item>
+                    <item name="bodyTmpl" xsi:type="string">Webcode_CronScheduler/schedule/status</item>
                     <item name="sortOrder" xsi:type="number">30</item>
                     <item name="sortable" xsi:type="boolean">true</item>
                 </item>

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!--
+/*
+ * @package      Webcode_CronScheduler
+ *
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <!--
+        Extends Magento's core cron_schedule table with the extra runtime metrics and
+        crash details this module records. Declared here (instead of the legacy
+        InstallSchema) so the columns are reconciled on every setup:upgrade and removed
+        automatically on module uninstall.
+    -->
+    <table name="cron_schedule" resource="default">
+        <column xsi:type="varchar" name="pid" length="100" nullable="true"
+                comment="Process id of the cron"/>
+        <column xsi:type="decimal" name="memory_usage" scale="2" precision="12" nullable="true"
+                comment="Memory Usage of the Cron"/>
+        <column xsi:type="decimal" name="cpu_usage" scale="2" precision="12" nullable="true"
+                comment="CPU Usage of the Cron"/>
+        <column xsi:type="decimal" name="system_usage" scale="2" precision="12" nullable="true"
+                comment="System Usage of the Cron"/>
+        <column xsi:type="boolean" name="is_mail_sent" nullable="true"
+                comment="Is mail sent for Missing Crons?"/>
+        <column xsi:type="text" name="error_message" nullable="true"
+                comment="FATAL Error / Exception Message"/>
+        <column xsi:type="text" name="error_file" nullable="true"
+                comment="Error File Name"/>
+        <column xsi:type="varchar" name="error_line" length="50" nullable="true"
+                comment="Error Line Number"/>
+    </table>
+</schema>

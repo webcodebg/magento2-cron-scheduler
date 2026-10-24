@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- /**
- * KiwiCommerce
- *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
- */
--->
+  ~ @package      Webcode_CronScheduler
+  ~
+  ~ @author       Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+  ~ @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
+  -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <script src="KiwiCommerce_CronScheduler::js/kiwicommerce_validation.js"/>
+        <script src="Webcode_CronScheduler::js/validation.js"/>
     </head>
     <body>
         <referenceContainer name="content">
             <uiComponent name="cronschedulerjob_form"/>
-            <block class="KiwiCommerce\CronScheduler\Block\Adminhtml\DefaultBlocks\Setvalues" name="AdminCronBASEURL" template="KiwiCommerce_CronScheduler::default/seturl.phtml" />
+            <block class="Webcode\CronScheduler\Block\Adminhtml\DefaultBlocks\Setvalues" name="AdminCronBASEURL" template="Webcode_CronScheduler::default/seturl.phtml" />
         </referenceContainer>
     </body>
 </page>

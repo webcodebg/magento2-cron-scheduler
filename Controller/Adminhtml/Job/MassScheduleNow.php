@@ -1,50 +1,28 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Controller\Adminhtml\Job;
+namespace Webcode\CronScheduler\Controller\Adminhtml\Job;
 
-/**
- * Class MassScheduleNow
- * @package KiwiCommerce\CronScheduler\Controller\Adminhtml\Job
- */
-class MassScheduleNow extends \Magento\Backend\App\Action
+use Exception;
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Cron\Model\Schedule;
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use Webcode\CronScheduler\Service\Cronjob;
+use Webcode\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory;
+
+class MassScheduleNow extends Action implements HttpPostActionInterface
 {
-    /**
-     * @var \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory
-     */
-    public $scheduleCollectionFactory = null;
-
-    /**
-     * @var \Magento\Framework\Stdlib\DateTime\TimezoneInterface
-     */
-    public $timezone;
-
-    /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    public $dateTime;
-
-    /**
-     * @var \KiwiCommerce\CronScheduler\Helper\Schedule
-     */
-    public $scheduleHelper = null;
-
-    /**
-     * @var \KiwiCommerce\CronScheduler\Helper\Cronjob
-     */
-    public $jobHelper = null;
-
     /**
      * @var string
      */
@@ -52,42 +30,39 @@ class MassScheduleNow extends \Magento\Backend\App\Action
 
     /**
      * Class constructor.
-     * @param \Magento\Backend\App\Action\Context $context
-     * @param \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $scheduleCollectionFactory
-     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
-     * @param \KiwiCommerce\CronScheduler\Helper\Schedule $scheduleHelper
-     * @param \KiwiCommerce\CronScheduler\Helper\Cronjob $jobHelper
+     *
+     * @param Context $context
+     * @param CollectionFactory $scheduleCollectionFactory
+     * @param TimezoneInterface $timezone
+     * @param DateTime $dateTime
+     * @param \Webcode\CronScheduler\Service\Schedule $scheduleHelper
+     * @param Cronjob $jobHelper
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
-        \KiwiCommerce\CronScheduler\Model\ResourceModel\Schedule\CollectionFactory $scheduleCollectionFactory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone,
-        \Magento\Framework\Stdlib\DateTime\DateTime $dateTime,
-        \KiwiCommerce\CronScheduler\Helper\Schedule $scheduleHelper,
-        \KiwiCommerce\CronScheduler\Helper\Cronjob $jobHelper
+        Context $context,
+        private readonly CollectionFactory $scheduleCollectionFactory,
+        private readonly TimezoneInterface $timezone,
+        private readonly DateTime $dateTime,
+        private readonly \Webcode\CronScheduler\Service\Schedule $scheduleHelper,
+        private readonly Cronjob $jobHelper
     ) {
-        $this->scheduleCollectionFactory = $scheduleCollectionFactory;
-        $this->timezone = $timezone;
-        $this->dateTime = $dateTime;
-        $this->scheduleHelper = $scheduleHelper;
-        $this->jobHelper = $jobHelper;
-
         parent::__construct($context);
     }
 
     /**
      * Is action allowed?
+     *
      * @return boolean
      */
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('KiwiCommerce_CronScheduler::'.$this->aclResource);
+        return $this->_authorization->isAllowed('Webcode_CronScheduler::' . $this->aclResource);
     }
 
     /**
      * Execute action
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
+     *
+     * @return ResponseInterface|ResultInterface
      */
     public function execute()
     {
@@ -103,6 +78,7 @@ class MassScheduleNow extends \Magento\Backend\App\Action
 
         if (empty($jobCodes)) {
             $this->messageManager->addErrorMessage(__('Selected jobs can not be scheduled now.'));
+
             return $this->_redirect('*/*/listing');
         }
 
@@ -111,26 +87,18 @@ class MassScheduleNow extends \Magento\Backend\App\Action
                 $job_status = $this->jobHelper->isJobActive($jobCode);
                 if ($job_status) {
                     $collection = $this->scheduleCollectionFactory->create()->getNewEmptyItem();
-
-                    $magentoVersion = $this->scheduleHelper->getMagentoversion();
-                    if (version_compare($magentoVersion, "2.2.0") >= 0) {
-                        $createdAt  = strftime('%Y-%m-%d %H:%M:%S', $this->dateTime->gmtTimestamp());
-                        $scheduleAt = strftime('%Y-%m-%dT%H:%M:%S', $this->dateTime->gmtTimestamp());
-                    } else {
-                        $createdAt  = strftime('%Y-%m-%d %H:%M:%S', $this->timezone->scopeTimeStamp());
-                        $scheduleAt = strftime('%Y-%m-%dT%H:%M:%S', $this->timezone->scopeTimeStamp());
-                    }
-
+                    $now = gmdate('Y-m-d H:i:s', $this->dateTime->gmtTimestamp());
                     $collection->setData('job_code', $jobCode);
-                    $collection->setData('status', \Magento\Cron\Model\Schedule::STATUS_PENDING);
-                    $collection->setData('created_at', $createdAt);
-                    $collection->setData('scheduled_at', $this->scheduleHelper->filterTimeInput($scheduleAt));
+                    $collection->setData('status', Schedule::STATUS_PENDING);
+                    $collection->setData('created_at', $now);
+                    $collection->setData('scheduled_at', $this->scheduleHelper->filterTimeInput());
                     $collection->save();
                     $success[] = $jobCode;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
+
             return $this->_redirect('*/*/listing');
         }
 

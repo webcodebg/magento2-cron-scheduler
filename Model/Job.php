@@ -1,76 +1,70 @@
 <?php
-/**
- * KiwiCommerce
+/*
+ * @package      Webcode_CronScheduler
  *
- * Do not edit or add to this file if you wish to upgrade to newer versions in the future.
- * If you wish to customise this module for your needs.
- * Please contact us https://kiwicommerce.co.uk/contacts.
- *
- * @category   KiwiCommerce
- * @package    KiwiCommerce_CronScheduler
- * @copyright  Copyright (C) 2018 Kiwi Commerce Ltd (https://kiwicommerce.co.uk/)
- * @license    https://kiwicommerce.co.uk/magento2-extension-license/
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright Copyright © 2020–2026 Webcode (https://webcode.bg/)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License 3.0 (OSL-3.0)
  */
 
-namespace KiwiCommerce\CronScheduler\Model;
+declare(strict_types=1);
 
-use \Magento\Framework\Model\AbstractModel;
+namespace Webcode\CronScheduler\Model;
 
-/**
- * Class Job
- * @package KiwiCommerce\CronScheduler\Model
- */
+use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Model\Context;
+use Magento\Framework\Model\ResourceModel\AbstractResource;
+use Magento\Framework\Registry;
+
 class Job extends AbstractModel
 {
     /**
      * @var string
      */
-    public $cronExprTemplate = 'crontab/{$group}/jobs/{$jobcode}/schedule/cron_expr';
+    private string $cronExprTemplate = 'crontab/{$group}/jobs/{$jobcode}/schedule/cron_expr';
 
     /**
      * @var string
      */
-    public $cronModelTemplate = 'crontab/{$group}/jobs/{$jobcode}/run/model';
+    private string $cronModelTemplate = 'crontab/{$group}/jobs/{$jobcode}/run/model';
 
     /**
      * @var string
      */
-    public $cronStatusTemplate = 'crontab/{$group}/jobs/{$jobcode}/is_active';
+    private string $cronStatusTemplate = 'crontab/{$group}/jobs/{$jobcode}/is_active';
 
     /**
      * @var string
      */
-    public $scope = \Magento\Framework\App\Config\ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
-
-    /**
-     * @var \Magento\Framework\App\Config\ConfigResource\ConfigInterface
-     */
-    public $configInterface = null;
+    private string $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
 
     /**
      * class constructor
-     * @param \Magento\Framework\Model\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
-     * @param \Magento\Framework\App\Config\ConfigResource\ConfigInterface $configInterface
+     *
+     * @param Context $context
+     * @param Registry $registry
+     * @param ConfigInterface $configInterface
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null $resourceCollection
      * @param array $data
      */
     public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\App\Config\ConfigResource\ConfigInterface $configInterface,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        Context $context,
+        Registry $registry,
+        private readonly ConfigInterface $configInterface,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
-        $this->configInterface = $configInterface;
     }
-
 
     /**
      * Save cron job for given data and expression
+     *
      * @param $data
      * @param $cronExpr
      * @param $jobCode
@@ -83,11 +77,11 @@ class Job extends AbstractModel
             '{$jobcode}' => $jobCode
         ];
 
-        $cronExprString   = strtr($this->cronExprTemplate, $vars);
-        $cronModelString  = strtr($this->cronModelTemplate, $vars);
+        $cronExprString = strtr($this->cronExprTemplate, $vars);
+        $cronModelString = strtr($this->cronModelTemplate, $vars);
         $cronStatusString = strtr($this->cronStatusTemplate, $vars);
-        $cronModelValue   = $data['instance'] . "::" . $data['method'];
-        $cronStatusValue  = $data['is_active'];
+        $cronModelValue = $data['instance'] . "::" . $data['method'];
+        $cronStatusValue = $data['is_active'];
 
         $this->configInterface
             ->saveConfig($cronExprString, $cronExpr, $this->scope, 0);
@@ -95,6 +89,32 @@ class Job extends AbstractModel
             ->saveConfig($cronModelString, $cronModelValue, $this->scope, 0);
         $this->configInterface
             ->saveConfig($cronStatusString, $cronStatusValue, $this->scope, 0);
+
+        if (array_key_exists('max_runtime', $data)) {
+            $this->saveMaxRuntime((string)$jobCode, (string)$data['max_runtime']);
+        }
+    }
+
+    /**
+     * Save the job's own kill limit; anything but digits removes it, so the global limit applies.
+     *
+     * @param string $jobCode
+     * @param string $minutes
+     *
+     * @return void
+     */
+    private function saveMaxRuntime(string $jobCode, string $minutes): void
+    {
+        $path = MaxRuntime::jobPath($jobCode);
+        $minutes = trim($minutes);
+
+        if (!ctype_digit($minutes)) {
+            $this->configInterface->deleteConfig($path, $this->scope, 0);
+
+            return;
+        }
+
+        $this->configInterface->saveConfig($path, $minutes, $this->scope, 0);
     }
 
     /**
@@ -119,6 +139,8 @@ class Job extends AbstractModel
             ->deleteConfig($cronModelString, $this->scope, 0);
         $this->configInterface
             ->deleteConfig($cronStatusString, $this->scope, 0);
+        $this->configInterface
+            ->deleteConfig(MaxRuntime::jobPath((string)$jobCode), $this->scope, 0);
     }
 
     /**
@@ -134,7 +156,7 @@ class Job extends AbstractModel
             '{$jobcode}' => $jobData['code']
         ];
         $cronStatusString = strtr($this->cronStatusTemplate, $vars);
-        $cronStatusValue  = $status;
+        $cronStatusValue = $status;
 
         $this->configInterface
             ->saveConfig($cronStatusString, $cronStatusValue, $this->scope, 0);
